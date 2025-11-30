@@ -10,15 +10,9 @@ from apps.users.managers.user import CustomUserManager
 
 class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     """
-    Custom user model with flexible authentication fields
-    and user roles (user, organizer, admin)
+    Custom user model with flexible authentication fields.
+    Role field removed.
     """
-
-    ROLE_CHOICES = (
-        ('user', 'User'),
-        ('organizer', 'Organizer'),
-        ('admin', 'Admin'),
-    )
 
     # Authentication fields
     email = models.EmailField(
@@ -36,9 +30,6 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     last_name = models.CharField(max_length=64, blank=True, null=True)
     middle_name = models.CharField(max_length=64, blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
-
-    # Role
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user', db_index=True)
 
     # Status fields
     is_active = models.BooleanField(default=False)
@@ -62,7 +53,6 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
             models.Index(fields=['email'], name='users_email_idx'),
             models.Index(fields=['username'], name='users_username_idx'),
             models.Index(fields=['phone_number'], name='users_phone_idx'),
-            models.Index(fields=['role'], name='users_role_idx'),
         ]
         constraints = [
             models.CheckConstraint(
@@ -99,7 +89,6 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
         refresh['email'] = self.email
         refresh['username'] = self.username
         refresh['user_id'] = self.id
-        refresh['role'] = self.role
 
         expires_at = timezone.now() + timedelta(seconds=refresh.access_token.lifetime.total_seconds())
         refresh_expires_at = timezone.now() + timedelta(seconds=refresh.lifetime.total_seconds())

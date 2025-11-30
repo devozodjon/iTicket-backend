@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'apps.shared',
     'apps.events',
     'apps.venues',
+    'apps.contacts',
     'apps.seats',
     'apps.orders',
     'apps.reviews',
