@@ -1,8 +1,17 @@
 from django.db import models
 
 from apps.shared.models import BaseModel
+from apps.users.models.user import User
+
 
 class Organizer(BaseModel):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='organizer',
+        null=True,
+        blank=True
+    )
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
     company_name = models.CharField(max_length=255)
