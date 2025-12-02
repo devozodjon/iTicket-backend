@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.users.models.user import VerificationCode, User
-from apps.users.serializers.register import RegisterSerializer, VerifyLoginCodeSerializer, RequestLoginCodeSerializer
+from apps.users.serializers.register import RegisterSerializer, LoginSerializer
 
 
 class RegisterView(generics.CreateAPIView):
@@ -45,22 +45,8 @@ class VerifyEmailAPIView(generics.GenericAPIView):
 
         return Response({'detail': 'Email verified successfully.'})
 
-class RequestLoginCodeAPIView(generics.CreateAPIView):
-    serializer_class = RequestLoginCodeSerializer
-    permission_classes = []
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            {"detail": "Verification code sent to your email."},
-            status=status.HTTP_200_OK
-        )
-
-
-class VerifyLoginCodeAPIView(generics.CreateAPIView):
-    serializer_class = VerifyLoginCodeSerializer
+class VerifyLoginAPIView(generics.CreateAPIView):
+    serializer_class = LoginSerializer
     permission_classes = []
 
     def create(self, request, *args, **kwargs):
