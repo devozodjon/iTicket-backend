@@ -16,11 +16,3 @@ class CategoryCreateSerializer(TranslatedFieldsWriteMixin, serializers.ModelSeri
         fields = [
             'name', 'description'
         ]
-
-
-class CategoryDetail(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = [
-            'name','description'
-        ]
