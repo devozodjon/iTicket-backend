@@ -1,6 +1,8 @@
 from rest_framework import status
+from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.views import APIView
 
 from apps.users.models.organizer import Organizer
 from apps.users.serializers.organizer import OrganizerCreateSerializer, OrganizerDetailSerializer
@@ -18,10 +20,10 @@ class OrganizerListCreateApiView(ListCreateAPIView):
             organizer = serializer.save()
             response_serializer = OrganizerDetailSerializer(organizer, context={'request': request})
             return CustomResponse.success(
-                message_key="ORGANIZER_CREATED",
+                message_key="SUCCESS_MESSAGE",
                 data=response_serializer.data,
-                status_code=status.HTTP_201_CREATED
             )
+
         return CustomResponse.error(
             message_key="VALIDATION_ERROR",
             errors=serializer.errors
@@ -31,7 +33,7 @@ class OrganizerListCreateApiView(ListCreateAPIView):
         queryset = self.get_queryset().order_by('company_name')
         serializer = OrganizerDetailSerializer(queryset, many=True, context={'request': request})
         return CustomResponse.success(
-            message_key="ORGANIZER_LIST",
+            message_key="SUCCESS_MESSAGE",
             data=serializer.data,
             status_code=status.HTTP_200_OK,
             request=request
@@ -43,35 +45,21 @@ class OrganizerDetailApiView(RetrieveUpdateDestroyAPIView):
     serializer_class = OrganizerDetailSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def retrieve(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance)
+        serializer = OrganizerDetailSerializer(instance, context={"request": request})
         return CustomResponse.success(
-            message_key="ORGANIZER_DETAIL",
+            message_key="SUCCESS_MESSAGE",
             data=serializer.data
         )
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        if serializer.is_valid():
-            organizer = serializer.save()
-            return CustomResponse.success(
-                message_key="ORGANIZER_UPDATED",
-                data=self.get_serializer(organizer).data,
-                status_code=status.HTTP_200_OK
-            )
-        return CustomResponse.error(
-            message_key="VALIDATION_ERROR",
-            errors=serializer.errors
-        )
-
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.delete()
+        organizer = self.get_object()
+        organizer.delete()
         return CustomResponse.success(
             message_key="ORGANIZER_DELETED",
             data=None,
-            status_code=status.HTTP_204_NO_CONTENT
+            status_code=status.HTTP_204_NO_CONTENT,
+            request=request
         )
+

@@ -3,14 +3,14 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 
 from apps.events.models import Category
 from apps.events.serializers.category import CategoryCreateSerializer, CategoryDetail
-from apps.shared.permissions.is_organizer import IsAdminOrReadOnly
+from apps.shared.permissions.is_organizer import IsAdminOrReadOnly, IsOrganizer
 from apps.shared.utils.custom_response import CustomResponse
 
 
 class CategoryListCreateApiView(ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryCreateSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsOrganizer]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request': request})
@@ -18,7 +18,7 @@ class CategoryListCreateApiView(ListCreateAPIView):
             category = serializer.save()
             response_serializer = CategoryDetail(category, context={'request': request})
             return CustomResponse.success(
-                message_key="CATEGORY_CREATED",
+                message_key="CREATED",
                 data=response_serializer.data,
                 status_code=status.HTTP_201_CREATED
             )
@@ -31,7 +31,7 @@ class CategoryListCreateApiView(ListCreateAPIView):
         queryset = self.get_queryset().order_by('name')
         serializer = CategoryDetail(queryset, many=True, context={'request': request})
         return CustomResponse.success(
-            message_key="CATEGORY_LIST",
+            message_key="SUCCESS_MESSAGE",
             data=serializer.data,
             status_code=status.HTTP_200_OK,
             request=request
@@ -41,13 +41,13 @@ class CategoryListCreateApiView(ListCreateAPIView):
 class CategoryDetailApiView(RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryDetail
-    permission_classes = [IsAdminOrReadOnly]  # permission qo‘shildi
+    permission_classes = [IsOrganizer]  # permission qo‘shildi
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return CustomResponse.success(
-            message_key="CATEGORY_DETAIL",
+            message_key="SUCCESS_MESSAGE",
             data=serializer.data
         )
 
@@ -58,7 +58,7 @@ class CategoryDetailApiView(RetrieveUpdateDestroyAPIView):
         if serializer.is_valid():
             category = serializer.save()
             return CustomResponse.success(
-                message_key="CATEGORY_UPDATED",
+                message_key="SUCCESS_MESSAGE",
                 data=self.get_serializer(category).data,
                 status_code=status.HTTP_200_OK
             )
@@ -71,7 +71,7 @@ class CategoryDetailApiView(RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         instance.delete()
         return CustomResponse.success(
-            message_key="CATEGORY_DELETED",
+            message_key="SUCCESS_MESSAGE",
             data=None,
             status_code=status.HTTP_204_NO_CONTENT
         )

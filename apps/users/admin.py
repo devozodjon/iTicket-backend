@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 
+from apps.users.models.organizer import Organizer
 from apps.users.models.user import User, VerificationCode
 from apps.users.models.device import Device, AppVersion, DeviceType
 
@@ -19,7 +20,8 @@ class UserAdmin(admin.ModelAdmin):
         'device_info_display',
         'last_visit_display',
         'status_display',
-        'actions_display'
+        'actions_display',
+        'is_organizer_display',  # Qo'shildi
     ]
     list_filter = [
         'is_active',
@@ -70,7 +72,8 @@ class UserAdmin(admin.ModelAdmin):
                 'is_active',
                 'is_staff',
                 'is_superuser',
-                'is_deleted'
+                'is_deleted',
+                'is_organizer'  # Qo'shildi
             )
         }),
         ('Временные метки', {
@@ -83,30 +86,21 @@ class UserAdmin(admin.ModelAdmin):
     )
 
     def id_display(self, obj):
-        """Display row number"""
         return f"{obj.id:02d}"
-
     id_display.short_description = "№"
 
     def created_at_display(self, obj):
-        """Display creation date and time"""
         return obj.created_at.strftime('%H:%M / %d.%m.%Y')
-
     created_at_display.short_description = "СОЗДАНО"
 
     def full_name_display(self, obj):
         """Display full name with icon"""
+        full_name = f"{obj.first_name or ''} {obj.last_name or ''}".strip()
         icon = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#666"/></svg>'
-        return format_html(
-            '{} {}',
-            mark_safe(icon),
-            obj.full_name or 'Не указано'
-        )
-
+        return format_html('{} {}', mark_safe(icon), full_name or 'Не указано')
     full_name_display.short_description = "Ф.И.О"
 
     def device_info_display(self, obj):
-        """Display device type and model"""
         device = obj.devices.filter(is_active=True).first()
         if device:
             return format_html(
@@ -115,20 +109,16 @@ class UserAdmin(admin.ModelAdmin):
                 device.device_model
             )
         return '-'
-
     device_info_display.short_description = "УСТРОЙСТВО"
 
     def last_visit_display(self, obj):
-        """Display last visit date"""
         device = obj.devices.filter(is_active=True).first()
         if device and device.last_login:
             return device.last_login.strftime('%H:%M / %d.%m.%Y')
         return '-'
-
     last_visit_display.short_description = "ПОСЛЕДНЕЕ ПОСЕЩЕНИЕ"
 
     def status_display(self, obj):
-        """Display active status with toggle"""
         if obj.is_active:
             return format_html(
                 '<div style="width: 40px; height: 20px; background: #4CAF50; border-radius: 10px; position: relative;">'
@@ -141,24 +131,25 @@ class UserAdmin(admin.ModelAdmin):
                 '<div style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; left: 2px; top: 2px;"></div>'
                 '</div>'
             )
-
     status_display.short_description = "СТАТУС"
 
     def actions_display(self, obj):
-        """Display action buttons"""
         detail_url = reverse('admin:users_user_change', args=[obj.pk])
         return format_html(
-            '<a href="{}" style="display: inline-block; width: 32px; height: 32px; background: #FFC107; border-radius: 4px; text-align: center; line-height: 32px; color: white; text-decoration: none; margin-right: 4px;">✎</a>'
-            '<a href="#" style="display: inline-block; width: 32px; height: 32px; background: #F44336; border-radius: 4px; text-align: center; line-height: 32px; color: white; text-decoration: none;">🗑</a>',
+            '<a href="{}" style="display:inline-block;width:32px;height:32px;background:#FFC107;border-radius:4px;text-align:center;line-height:32px;color:white;text-decoration:none;margin-right:4px;">✎</a>'
+            '<a href="#" style="display:inline-block;width:32px;height:32px;background:#F44336;border-radius:4px;text-align:center;line-height:32px;color:white;text-decoration:none;">🗑</a>',
             detail_url
         )
-
     actions_display.short_description = "ДЕЙСТВИЯ"
 
+    def is_organizer_display(self, obj):
+        return "Да" if obj.is_organizer else "Нет"
+    is_organizer_display.short_description = "Организатор"
+
     def get_queryset(self, request):
-        """Optimize queryset with related objects"""
         qs = super().get_queryset(request)
         return qs.prefetch_related('devices')
+
 
 
 @admin.register(Device)
@@ -429,6 +420,14 @@ class VerificationCodeAdmin(admin.ModelAdmin):
 
 
 # Custom admin site configuration
-admin.site.site_header = "HAVAS Администрирование"
-admin.site.site_title = "HAVAS Admin"
+admin.site.site_header = "iTicket Администрирование"
+admin.site.site_title = "iTicket Admin"
 admin.site.index_title = "Главная страница"
+
+
+@admin.register(Organizer)
+class OrganizerAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'company_name', 'first_name', 'last_name', 'email', 'is_active')
+    search_fields = ('user__email', 'company_name', 'first_name', 'last_name')
+    list_filter = ('is_active',)
+    readonly_fields = ('id',)

@@ -13,6 +13,10 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     Custom user model with flexible authentication fields.
     Role field removed.
     """
+    ROLE_CHOICES = (
+        ('user', 'User'),
+        ('organizer', 'Organizer'),
+    )
 
     # Authentication fields
     email = models.EmailField(
@@ -32,6 +36,7 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     date_of_birth = models.DateField(null=True, blank=True)
 
     # Status fields
+    is_organizer = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
     is_email_verified = models.BooleanField(default=False)
     is_phone_verified = models.BooleanField(default=False)
@@ -40,6 +45,8 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     is_superuser = models.BooleanField(default=False)
 
     objects = CustomUserManager()
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
+
 
     # Authentication
     USERNAME_FIELD = 'phone_number'

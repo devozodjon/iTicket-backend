@@ -11,7 +11,7 @@ from apps.shared.utils.custom_response import CustomResponse
 class EventDetailApiView(RetrieveUpdateDestroyAPIView):
     queryset = Events.objects.all()
     serializer_class = EventDetailSerializer
-    permission_classes = [AllowAny]  # retrieve uchun
+    permission_classes = [AllowAny]
 
     def retrieve(self, request, *args, **kwargs):
         """Har bir user event detailini ko‘ra oladi"""
@@ -26,7 +26,6 @@ class EventDetailApiView(RetrieveUpdateDestroyAPIView):
         """Faqat event organizer update qilishi mumkin"""
         instance = self.get_object()
 
-        # Foydalanuvchi organizer emas yoki o'z eventi emas → xatolik
         if not hasattr(request.user, "organizer") or instance.organizer != request.user.organizer:
             raise PermissionDenied("You do not have permission to update this event.")
 

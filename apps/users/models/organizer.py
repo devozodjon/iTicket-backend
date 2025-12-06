@@ -8,9 +8,7 @@ class Organizer(BaseModel):
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
-        related_name='organizer',
-        null=True,
-        blank=True
+        related_name='organizer'
     )
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
@@ -22,7 +20,7 @@ class Organizer(BaseModel):
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.company_name} ({self.first_name} {self.last_name})"
+        return f"{self.first_name} {self.last_name}"
 
     class Meta:
         verbose_name = 'Organizer'

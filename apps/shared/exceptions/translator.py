@@ -7,24 +7,34 @@ logger = logging.getLogger(__name__)
 
 
 class MessageDetail(TypedDict):
-    """Structure for formatted message details"""
+    """Final translated response message structure"""
     id: str
     message: str
     status_code: int
 
 
 def get_message_detail(
-        message_key: str,
-        lang: str = "en",
-        context: Dict[str, Any] | None = None
+    message_key: str,
+    lang: str = "en",
+    context: Dict[str, Any] | None = None
 ) -> MessageDetail:
-    # Get message template with fallback
+    """
+    Get translated and formatted message by message_key.
+
+    Supports:
+    - full language (uz-UZ)
+    - short language (uz)
+    - fallback to English
+    """
+
+    # 1) Get message template
     message = MESSAGES.get(message_key)
 
     if not message:
         logger.warning(f"Message key not found: {message_key}")
-        message = MESSAGES.get('UNKNOWN_ERROR')
+        message = MESSAGES.get("UNKNOWN_ERROR")
 
+        # If even UNKNOWN_ERROR missing — create fallback
         if not message:
             logger.error("UNKNOWN_ERROR message not found in MESSAGES dictionary")
             return {
@@ -33,43 +43,39 @@ def get_message_detail(
                 "status_code": 500
             }
 
+    # 2) Context for formatting
     context = context or {}
-    messages_dict = message["messages"]
 
-    # Language fallback chain
-    base_lang = lang.split('-')[0].split('_')[0]
+    messages_dict: Dict[str, str] = message["messages"]
+
+    # 3) Language fallback order
+    base_lang = lang.split("-")[0].split("_")[0]
+
     template = (
-            messages_dict.get(lang)
-            or messages_dict.get(base_lang)
-            or messages_dict.get("en", "Error occurred")
+        messages_dict.get(lang)
+        or messages_dict.get(base_lang)
+        or messages_dict.get("en")
+        or "Error occurred"
     )
 
-    # Format message
+    # 4) Format message safely
     try:
-        formatted_message: str = template.format(**context)
-    except (KeyError, ValueError) as e:
+        formatted_message = template.format(**context)
+    except Exception as e:
         logger.warning(
-            f"Message formatting failed - "
-            f"key: {message_key}, lang: {lang}, "
-            f"error: {e}, context: {context}"
+            f"Message formatting failed — key='{message_key}', lang='{lang}', "
+            f"context={context}, error={e}"
         )
         formatted_message = template
 
+    # 5) Return final structure
     return {
         "id": message["id"],
         "message": formatted_message,
-        "status_code": message["status_code"]
+        "status_code": message["status_code"],
     }
 
 
 def get_raw_message(message_key: str) -> MessageTemplate | None:
-    """
-    Get raw message template (internal use only).
-
-    Args:
-        message_key: Key to look up in MESSAGES dictionary
-
-    Returns:
-        MessageTemplate or None if not found
-    """
+    """Return raw MESSAGES template entry (internal use only)."""
     return MESSAGES.get(message_key)

@@ -1,9 +1,11 @@
 from django.urls import path
 
-from apps.orders.views import home
+from apps.venues.views.venue_create import VenueListCreateApiView
+from apps.venues.views.venue_detail import VenueDetailApiView
 
-app_name = 'orders'
+app_name = "venues"
 
 urlpatterns = [
-    path('',home)
+    path("", VenueListCreateApiView.as_view(), name="venue-list-create"),
+    path("<int:pk>/", VenueDetailApiView.as_view(), name="venue-detail"),
 ]

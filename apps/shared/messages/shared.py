@@ -1,5 +1,4 @@
 from typing import Dict
-
 from .types import MessageTemplate
 
 SHARED_MESSAGES: Dict[str, MessageTemplate] = {
@@ -125,9 +124,18 @@ SHARED_MESSAGES: Dict[str, MessageTemplate] = {
         "messages": {
             "en": "Token is required",
             "uz": "Token berilmadi",
-            "ru": "Ruscha bilmayman",
+            "ru": "Токен не предоставлен",
         },
         "status_code": 400
     },
-
+    # Yangi qo'shilgan xabar
+    "ORGANIZER_CREATED": {
+        "id": "ORGANIZER_CREATED",
+        "messages": {
+            "en": "Organizer successfully created",
+            "uz": "Organizer muvaffaqiyatli yaratildi",
+            "ru": "Организатор успешно создан"
+        },
+        "status_code": 201
+    },
 }

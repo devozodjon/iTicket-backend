@@ -231,10 +231,10 @@ class TranslatedFieldsReadMixin:
             # Language-specific media
             lang_map = {l[0].lower(): l[0] for l in settings.LANGUAGES}
             db_lang = lang_map.get(language)
-            qs = instance.media_files.filter(media_type=media_type, language=db_lang)
+            qs = instance.media_fields.filter(media_type=media_type, language=db_lang)
         else:
             # Shared media (no language)
-            qs = instance.media_files.filter(media_type=media_type, language__isnull=True)
+            qs = instance.media_fields.filter(media_type=media_type, language__isnull=True)
 
         # Return list or single object
         if is_list:

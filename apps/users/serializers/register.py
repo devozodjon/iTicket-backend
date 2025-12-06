@@ -4,14 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from rest_framework import serializers
 from apps.users.models.user import User, VerificationCode
-from apps.users.utils.code_generators import (
-    generate_unique_username,
-    generate_verification_code,
-    send_email
-)
-
+from apps.users.utils.code_generators import generate_unique_username, generate_verification_code, send_email
 
 class RegisterSerializer(serializers.ModelSerializer):
     password_confirm = serializers.CharField(write_only=True)
@@ -38,7 +33,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=password,
             email=validated_data.get('email'),
             phone_number=validated_data.get('phone_number'),
-            is_active=False
+            is_active=False,
+            is_organizer=False
         )
 
         code = generate_verification_code()
@@ -50,7 +46,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class VerifyCodeSerializer(serializers.Serializer):
-    """Check verification code and activate user"""
     email = serializers.EmailField()
     code = serializers.CharField(max_length=6)
 
@@ -81,7 +76,6 @@ class VerifyCodeSerializer(serializers.Serializer):
         return attrs
 
 
-
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
@@ -100,6 +94,16 @@ class LoginSerializer(serializers.Serializer):
 
         attrs["user"] = user
         return attrs
+
+    def create_token(self):
+        user = self.validated_data["user"]
+        refresh = RefreshToken.for_user(user)
+        refresh['is_organizer'] = user.is_organizer  # token ichiga rol qo‘shish
+        return {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "is_organizer": user.is_organizer
+        }
 
 
 class LogoutAPIView(generics.GenericAPIView):

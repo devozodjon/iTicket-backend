@@ -55,8 +55,11 @@ class VerifyLoginAPIView(generics.CreateAPIView):
         user = serializer.validated_data["user"]
 
         refresh = RefreshToken.for_user(user)
+        refresh['is_organizer'] = user.is_organizer
+
         return Response({
             "refresh": str(refresh),
             "access": str(refresh.access_token),
+            "is_organizer": user.is_organizer,
             "detail": "Login successful"
         }, status=status.HTTP_200_OK)
