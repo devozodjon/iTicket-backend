@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from apps.events.models import Events, Category
-from apps.events.serializers.event_create_serializer import EventTranslationMixin
-from apps.shared.mixins.translation_mixins import TranslatedFieldsReadMixin
 from apps.venues.models import Venue
+from apps.shared.mixins.translation_mixins import TranslatedFieldsReadMixin
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -17,10 +16,9 @@ class VenueSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description']
 
 
-class EventDetailSerializer(EventTranslationMixin, TranslatedFieldsReadMixin, serializers.ModelSerializer):
+class EventDetailSerializer(TranslatedFieldsReadMixin, serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     venue = VenueSerializer(read_only=True)
-
     images = serializers.SerializerMethodField()
 
     class Meta:
@@ -43,4 +41,3 @@ class EventDetailSerializer(EventTranslationMixin, TranslatedFieldsReadMixin, se
 
     def get_images(self, obj):
         return self._get_media(obj, 'images', 'uz')
-

@@ -164,13 +164,12 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT bilan authentication
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # Default permission
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'PAGE_SIZE': 20,
-    # 'EXCEPTION_HANDLER': 'apps.shared.exceptions.handler.custom_exception_handler',
     'DEFAULT_PAGINATION_CLASS': 'apps.shared.utils.custom_pagination.CustomPageNumberPagination',
 }
 
