@@ -1,14 +1,15 @@
 from rest_framework import status
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from apps.seats.models import Seat
-from apps.seats.serializers.seats_list import SeatCreateSerializer, SeatDetailSerializer
+
+from apps.seats.models import SeatSection
+from apps.seats.serializers.section_list import SeatSectionCreateSerializer
 from apps.shared.utils.custom_response import CustomResponse
 
-# Seat CRUD
-class SeatListCreateApiView(ListCreateAPIView):
-    queryset = Seat.objects.all().order_by('id')
-    serializer_class = SeatCreateSerializer
+
+class SeatSectionListCreateApiView(ListCreateAPIView):
+    queryset = SeatSection.objects.all().order_by('id')
+    serializer_class = SeatSectionCreateSerializer
     permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
@@ -22,15 +23,14 @@ class SeatListCreateApiView(ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            seat = serializer.save()
+            section = serializer.save()
             return CustomResponse.success(
                 message_key="CREATED_SUCCESSFULLY",
-                data=self.get_serializer(seat).data,
+                data=self.get_serializer(section).data,
                 status_code=status.HTTP_201_CREATED
             )
         return CustomResponse.error(
             message_key="VALIDATION_ERROR",
             errors=serializer.errors
         )
-
 

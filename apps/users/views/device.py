@@ -1,6 +1,7 @@
 from typing import Any
 
 from rest_framework import generics, permissions, status
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from apps.shared.permissions.mobile import IsMobileUser
 from apps.shared.utils.custom_response import CustomResponse
@@ -37,7 +38,7 @@ class DeviceRegisterCreateAPIView(generics.CreateAPIView):
 class DeviceListApiView(generics.ListAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceRegisterSerializer
-    permission_classes = [IsMobileUser]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
