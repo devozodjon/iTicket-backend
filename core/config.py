@@ -35,5 +35,5 @@ DB_HOST = env('DB_HOST', default='changeme')
 DB_PORT = env('DB_PORT', default=5432)
 
 # telegram bot
-TELEGRAM_BOT_TOKEN = env('TELEGRAM_BOT_TOKEN', default='8518967970:AAG1DpvvK26su4lQbGSNmmYlchVthUKYYgA')
+TELEGRAM_BOT_TOKEN = env('TELEGRAM_BOT_TOKEN', default='340881587:AAHdppOFFbAPjZObBcDWOoxUBsXtD5fXo4c')
 TELEGRAM_CHANNEL_ID = env('TELEGRAM_CHANNEL_ID', default='id')
